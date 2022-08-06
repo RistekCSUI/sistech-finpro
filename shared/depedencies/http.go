@@ -1,6 +1,8 @@
 package depedencies
 
 import (
+	"time"
+
 	"github.com/RistekCSUI/sistech-finpro/shared/config"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
@@ -8,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
-	"time"
 )
 
 func NewHttp(env *config.EnvConfig) *fiber.App {
@@ -18,7 +19,7 @@ func NewHttp(env *config.EnvConfig) *fiber.App {
 	})
 
 	app.Use(logger.New(logger.Config{
-		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+		Format: "[${time}] ${status} - ${latency} ${method} ${path}\n",
 	}))
 
 	app.Use(cors.New(cors.ConfigDefault))
