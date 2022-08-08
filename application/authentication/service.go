@@ -23,14 +23,16 @@ func (s *service) Insert(request dto.RegisterRequest) (interface{}, error) {
 		{"username", request.Username},
 		{"accessToken", request.Token},
 		{"password", request.Password},
+		{"role", request.Role},
 	}
-	_, err := s.DB.Find(
+	exist := s.DB.FindOne(
 		context.TODO(),
 		bson.D{
 			{"username", request.Username},
 			{"accessToken", request.Token},
 		})
-	if err == nil {
+
+	if exist.Err() == nil {
 		return nil, errors.New("duplicate username for this access key")
 	}
 

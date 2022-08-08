@@ -4,6 +4,7 @@ import (
 	"github.com/RistekCSUI/sistech-finpro/application"
 	"github.com/RistekCSUI/sistech-finpro/shared"
 	"github.com/RistekCSUI/sistech-finpro/shared/dto"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -23,6 +24,10 @@ type (
 )
 
 func (v *viewService) BuildRegisterRequest(body *dto.RegisterDto, accessToken string) (*dto.RegisterRequest, error) {
+	if body.Role != dto.USER && body.Role != dto.ADMIN {
+		return nil, errors.New("invalid role type")
+	}
+
 	bytes, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 	if err != nil {
 		return nil, err
@@ -50,6 +55,7 @@ func (v *viewService) RegisterUser(request dto.RegisterRequest) (*dto.RegisterRe
 	response := &dto.RegisterResponse{
 		ID:       id.(primitive.ObjectID),
 		Username: request.Username,
+		Role:     request.Role,
 	}
 
 	return response, nil
@@ -69,6 +75,7 @@ func (v *viewService) Login(request dto.LoginRequest) (*dto.LoginResponse, error
 	response := &dto.LoginResponse{
 		Username: user.Username,
 		Token:    token,
+		Role:     user.Role,
 	}
 
 	return response, nil
