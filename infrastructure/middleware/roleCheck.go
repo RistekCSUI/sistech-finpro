@@ -13,12 +13,3 @@ func (m *Middleware) RoleAdminCheck(c *fiber.Ctx) error {
 	}
 	return c.Next()
 }
-
-func (m *Middleware) RoleUserCheck(c *fiber.Ctx) error {
-	user := c.Locals("auth").(dto.User)
-	if user.Role == dto.ADMIN {
-		m.shared.Logger.Infof("role mismatched for user id: %s", user.ID)
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "role mismatched error"})
-	}
-	return c.Next()
-}
