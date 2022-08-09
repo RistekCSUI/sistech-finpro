@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/RistekCSUI/sistech-finpro/shared/dto"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -12,6 +13,7 @@ type (
 	Service interface {
 		Insert(request dto.RegisterRequest) (interface{}, error)
 		FindUser(token string, username string) (dto.User, error)
+		FindUserByID(id string) (dto.User, error)
 	}
 	service struct {
 		DB *mongo.Collection
@@ -53,6 +55,22 @@ func (s *service) FindUser(token string, username string) (dto.User, error) {
 			{"accessToken", token},
 		}).Decode(&result)
 
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func (s *service) FindUserByID(id string) (dto.User, error) {
+	var result = dto.User{}
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return result, err
+	}
+
+	err = s.DB.FindOne(context.TODO(), bson.D{{"_id", objectId}}).Decode(&result)
 	if err != nil {
 		return result, err
 	}

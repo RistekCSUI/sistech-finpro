@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/access"
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/authentication"
+	"github.com/RistekCSUI/sistech-finpro/infrastructure/category"
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
@@ -15,6 +16,7 @@ type (
 		Access         access.Controller
 		Authentication authentication.Controller
 		Middleware     middleware.Middleware
+		Category       category.Controller
 	}
 )
 
@@ -31,10 +33,15 @@ func Register(container *dig.Container) error {
 		return errors.Wrap(err, "failed to provide middleware")
 	}
 
+	if err := container.Provide(category.NewCategoryController); err != nil {
+		return errors.Wrap(err, "failed to provide category controller")
+	}
+
 	return nil
 }
 
 func Routes(app *fiber.App, controller Holder) {
 	controller.Access.AccessRoutes(app)
 	controller.Authentication.AuthenticationRoutes(app)
+	controller.Category.CategoryRoutes(app)
 }

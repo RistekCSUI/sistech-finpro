@@ -70,7 +70,7 @@ func (v *viewService) Login(request dto.LoginRequest) (*dto.LoginResponse, error
 		return nil, err
 	}
 
-	token, err := v.shared.JWT.GenerateToken(user.ID.String())
+	token, err := v.shared.JWT.GenerateToken(user.ID.Hex())
 
 	response := &dto.LoginResponse{
 		Username: user.Username,
