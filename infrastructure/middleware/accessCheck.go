@@ -15,7 +15,7 @@ type Middleware struct {
 	shared      shared.Holder
 }
 
-const ACCESS_TOKEN_CACHE_NAME = "sistech-access-token-"
+const AccessTokenCacheName = "sistech-access-token-"
 
 func (m *Middleware) AccessCheck(c *fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
@@ -28,7 +28,7 @@ func (m *Middleware) AccessCheck(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Wrong authorization format"})
 	}
 
-	key := fmt.Sprintf("%s%s", ACCESS_TOKEN_CACHE_NAME, authToken[1])
+	key := fmt.Sprintf("%s%s", AccessTokenCacheName, authToken[1])
 
 	_, err := m.shared.Redis.Get(context.Background(), key).Result()
 	if err == nil {
@@ -45,7 +45,7 @@ func (m *Middleware) AccessCheck(c *fiber.Ctx) error {
 
 	go func() {
 		m.shared.Logger.Infof("setting cache for user token: %s", authToken[1])
-		m.shared.Redis.SetEx(context.Background(), key, authToken[1], time.Minute*5)
+		m.shared.Redis.SetEx(context.Background(), key, authToken[1], time.Minute*1)
 	}()
 
 	c.Locals("user", authToken[1])
