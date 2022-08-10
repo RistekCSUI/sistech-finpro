@@ -12,6 +12,7 @@ type (
 		CreateCategory(request dto.CreateCategoryRequest) (*dto.Category, error)
 		EditCategory(request dto.EditCategoryRequest) (*dto.EditCategoryResponse, error)
 		DeleteCategory(request dto.DeleteCategoryRequest) (*dto.DeleteCategoryResponse, error)
+		GetAllCategory(request dto.GetAllCategoryRequest) (*[]dto.Category, error)
 	}
 
 	viewService struct {
@@ -58,6 +59,15 @@ func (v *viewService) DeleteCategory(request dto.DeleteCategoryRequest) (*dto.De
 	}
 
 	return res, nil
+}
+
+func (v *viewService) GetAllCategory(request dto.GetAllCategoryRequest) (*[]dto.Category, error) {
+	data, err := v.application.CategoryService.FindAll(request)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func NewViewService(application application.Holder, shared shared.Holder) ViewService {

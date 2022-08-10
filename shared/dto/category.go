@@ -3,7 +3,7 @@ package dto
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Category struct {
-	ID   primitive.ObjectID `json:"id" bson:_id"`
+	ID   primitive.ObjectID `json:"id" bson:"_id"`
 	Name string             `json:"name" bson:"name"`
 }
 
@@ -42,4 +42,8 @@ type DeleteCategoryRequest struct {
 
 type DeleteCategoryResponse struct {
 	DeletedCount int64 `json:"deletedCount"`
+}
+
+type GetAllCategoryRequest struct {
+	Token string
 }

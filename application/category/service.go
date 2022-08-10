@@ -14,6 +14,7 @@ type (
 		Insert(request dto.CreateCategoryRequest) (interface{}, error)
 		Update(request dto.EditCategoryRequest) (interface{}, error)
 		Delete(request dto.DeleteCategoryRequest) (interface{}, error)
+		FindAll(request dto.GetAllCategoryRequest) (*[]dto.Category, error)
 	}
 
 	service struct {
@@ -74,6 +75,27 @@ func (s *service) Delete(request dto.DeleteCategoryRequest) (interface{}, error)
 		return nil, err
 	}
 	return result.DeletedCount, nil
+}
+
+func (s *service) FindAll(request dto.GetAllCategoryRequest) (*[]dto.Category, error) {
+	var result []dto.Category
+
+	cur, err := s.DB.Find(context.TODO(), bson.D{{"accessToken", request.Token}})
+	if err != nil {
+		return nil, err
+	}
+
+	for cur.Next(context.TODO()) {
+		var elem dto.Category
+		_ = cur.Decode(&elem)
+		result = append(result, elem)
+	}
+
+	if err = cur.Err(); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func NewService(db *mongo.Database) Service {
