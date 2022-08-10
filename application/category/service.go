@@ -13,6 +13,7 @@ type (
 	Service interface {
 		Insert(request dto.CreateCategoryRequest) (interface{}, error)
 		Update(request dto.EditCategoryRequest) (interface{}, error)
+		Delete(request dto.DeleteCategoryRequest) (interface{}, error)
 	}
 
 	service struct {
@@ -64,6 +65,15 @@ func (s *service) Update(request dto.EditCategoryRequest) (interface{}, error) {
 	}
 
 	return result.ModifiedCount, nil
+}
+
+func (s *service) Delete(request dto.DeleteCategoryRequest) (interface{}, error) {
+	id, _ := primitive.ObjectIDFromHex(request.ID)
+	result, err := s.DB.DeleteOne(context.TODO(), bson.M{"_id": id, "accessToken": request.Token})
+	if err != nil {
+		return nil, err
+	}
+	return result.DeletedCount, nil
 }
 
 func NewService(db *mongo.Database) Service {

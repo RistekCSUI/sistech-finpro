@@ -23,6 +23,8 @@ func (c *Controller) CategoryRoutes(app *fiber.App) {
 	category.Post("/", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.createCategory)
 
 	category.Put("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.editCategory)
+
+	category.Delete("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.deleteCategory)
 }
 
 func (c *Controller) createCategory(ctx *fiber.Ctx) error {
@@ -73,6 +75,19 @@ func (c *Controller) editCategory(ctx *fiber.Ctx) error {
 		EditCategoryDto: requestBody,
 		Token:           ctx.Locals("user").(string),
 		ID:              ctx.Params("id"),
+	})
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (c *Controller) deleteCategory(ctx *fiber.Ctx) error {
+	res, err := c.Interfaces.CategoryViewService.DeleteCategory(dto.DeleteCategoryRequest{
+		ID:    ctx.Params("id"),
+		Token: ctx.Locals("user").(string),
 	})
 
 	if err != nil {

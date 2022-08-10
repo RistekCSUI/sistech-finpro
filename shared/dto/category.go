@@ -34,3 +34,12 @@ type EditCategoryResponse struct {
 	ModifiedCount int64  `json:"modifiedCount"`
 	Name          string `json:"name"`
 }
+
+type DeleteCategoryRequest struct {
+	ID    string
+	Token string
+}
+
+type DeleteCategoryResponse struct {
+	DeletedCount int64 `json:"deletedCount"`
+}

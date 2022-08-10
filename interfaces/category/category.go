@@ -11,6 +11,7 @@ type (
 	ViewService interface {
 		CreateCategory(request dto.CreateCategoryRequest) (*dto.Category, error)
 		EditCategory(request dto.EditCategoryRequest) (*dto.EditCategoryResponse, error)
+		DeleteCategory(request dto.DeleteCategoryRequest) (*dto.DeleteCategoryResponse, error)
 	}
 
 	viewService struct {
@@ -41,6 +42,19 @@ func (v *viewService) EditCategory(request dto.EditCategoryRequest) (*dto.EditCa
 	res := &dto.EditCategoryResponse{
 		ModifiedCount: data.(int64),
 		Name:          request.Name,
+	}
+
+	return res, nil
+}
+
+func (v *viewService) DeleteCategory(request dto.DeleteCategoryRequest) (*dto.DeleteCategoryResponse, error) {
+	data, err := v.application.CategoryService.Delete(request)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &dto.DeleteCategoryResponse{
+		DeletedCount: data.(int64),
 	}
 
 	return res, nil

@@ -36,6 +36,10 @@ func (m *Middleware) AuthCheck(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no user found for given token"})
 	}
 
+	if res.AccessToken != c.Locals("user") {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid access for other access token"})
+	}
+
 	go func() {
 		m.shared.Logger.Infof("setting cache for user id: %s", userId)
 		encode, _ := json.Marshal(res)
