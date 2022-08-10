@@ -19,9 +19,10 @@ func (c *Controller) CategoryRoutes(app *fiber.App) {
 	category := app.Group("/category")
 
 	category.Use(c.Middleware.AccessCheck)
-	category.Use(c.Middleware.AuthCheck)
 
-	category.Post("/", c.Middleware.RoleAdminCheck, c.createCategory)
+	category.Post("/", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.createCategory)
+
+	category.Put("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.editCategory)
 }
 
 func (c *Controller) createCategory(ctx *fiber.Ctx) error {
@@ -43,6 +44,35 @@ func (c *Controller) createCategory(ctx *fiber.Ctx) error {
 	res, err := c.Interfaces.CategoryViewService.CreateCategory(dto.CreateCategoryRequest{
 		CreateCategoryDto: requestBody,
 		Token:             ctx.Locals("user").(string),
+	})
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (c *Controller) editCategory(ctx *fiber.Ctx) error {
+	var (
+		requestBody dto.EditCategoryDto
+	)
+
+	err := ctx.BodyParser(&requestBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	res, err := c.Interfaces.CategoryViewService.EditCategory(dto.EditCategoryRequest{
+		EditCategoryDto: requestBody,
+		Token:           ctx.Locals("user").(string),
+		ID:              ctx.Params("id"),
 	})
 
 	if err != nil {

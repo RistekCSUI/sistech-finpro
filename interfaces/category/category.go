@@ -10,6 +10,7 @@ import (
 type (
 	ViewService interface {
 		CreateCategory(request dto.CreateCategoryRequest) (*dto.Category, error)
+		EditCategory(request dto.EditCategoryRequest) (*dto.EditCategoryResponse, error)
 	}
 
 	viewService struct {
@@ -28,6 +29,20 @@ func (v *viewService) CreateCategory(request dto.CreateCategoryRequest) (*dto.Ca
 		ID:   data.(primitive.ObjectID),
 		Name: request.Name,
 	}
+	return res, nil
+}
+
+func (v *viewService) EditCategory(request dto.EditCategoryRequest) (*dto.EditCategoryResponse, error) {
+	data, err := v.application.CategoryService.Update(request)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &dto.EditCategoryResponse{
+		ModifiedCount: data.(int64),
+		Name:          request.Name,
+	}
+
 	return res, nil
 }
 

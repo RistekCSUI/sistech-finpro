@@ -39,7 +39,7 @@ func (m *Middleware) AuthCheck(c *fiber.Ctx) error {
 	go func() {
 		m.shared.Logger.Infof("setting cache for user id: %s", userId)
 		encode, _ := json.Marshal(res)
-		m.shared.Redis.SetEx(context.Background(), key, string(encode), time.Minute*3)
+		m.shared.Redis.SetEx(context.Background(), key, string(encode), time.Minute*1)
 	}()
 
 	c.Locals("auth", res)

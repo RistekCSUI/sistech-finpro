@@ -45,7 +45,7 @@ func (m *Middleware) AccessCheck(c *fiber.Ctx) error {
 
 	go func() {
 		m.shared.Logger.Infof("setting cache for user token: %s", authToken[1])
-		m.shared.Redis.SetEx(context.Background(), key, authToken[1], time.Minute*3)
+		m.shared.Redis.SetEx(context.Background(), key, authToken[1], time.Minute*1)
 	}()
 
 	c.Locals("user", authToken[1])

@@ -19,3 +19,18 @@ type CreateCategoryRequest struct {
 	CreateCategoryDto
 	Token string
 }
+
+type EditCategoryDto struct {
+	Name string `json:"name" validate:"required"`
+}
+
+type EditCategoryRequest struct {
+	EditCategoryDto
+	ID    string
+	Token string
+}
+
+type EditCategoryResponse struct {
+	ModifiedCount int64  `json:"modifiedCount"`
+	Name          string `json:"name"`
+}

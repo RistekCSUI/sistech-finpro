@@ -5,12 +5,14 @@ import (
 	"github.com/RistekCSUI/sistech-finpro/shared/dto"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
 	Service interface {
 		Insert(request dto.CreateCategoryRequest) (interface{}, error)
+		Update(request dto.EditCategoryRequest) (interface{}, error)
 	}
 
 	service struct {
@@ -35,6 +37,33 @@ func (s *service) Insert(request dto.CreateCategoryRequest) (interface{}, error)
 	}
 
 	return res.InsertedID, nil
+}
+
+func (s *service) Update(request dto.EditCategoryRequest) (interface{}, error) {
+	row := bson.D{
+		{"accessToken", request.Token},
+		{"name", request.Name},
+	}
+
+	exist := s.DB.FindOne(context.TODO(), row)
+	if exist.Err() == nil {
+		return nil, errors.New("duplicate category name for this access key")
+	}
+
+	id, _ := primitive.ObjectIDFromHex(request.ID)
+	result, err := s.DB.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": id, "accessToken": request.Token},
+		bson.D{
+			{"$set", bson.D{{"name", request.Name}}},
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result.ModifiedCount, nil
 }
 
 func NewService(db *mongo.Database) Service {
