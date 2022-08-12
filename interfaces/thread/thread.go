@@ -12,6 +12,7 @@ type (
 		CreateThread(request dto.CreateThreadRequest) (*dto.CreateThreadResponse, error)
 		GetAllThreadyByCategory(request dto.GetAllThreadRequest) (*[]dto.Thread, error)
 		EditThread(request dto.EditThreadRequest) (*dto.EditThreadResponse, error)
+		DeleteThread(request dto.DeleteThreadRequest) (*dto.DeleteThreadResponse, error)
 	}
 	viewService struct {
 		application application.Holder
@@ -56,6 +57,19 @@ func (v *viewService) EditThread(request dto.EditThreadRequest) (*dto.EditThread
 	res := &dto.EditThreadResponse{
 		ModifiedCount: data.(int64),
 		Name:          request.Name,
+	}
+
+	return res, nil
+}
+
+func (v *viewService) DeleteThread(request dto.DeleteThreadRequest) (*dto.DeleteThreadResponse, error) {
+	data, err := v.application.ThreadService.Delete(request)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &dto.DeleteThreadResponse{
+		DeletedCount: data.(int64),
 	}
 
 	return res, nil

@@ -125,6 +125,7 @@ func (c *Controller) getAllCategoryThread(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(res)
 }
+
 func NewCategoryController(middleware middleware.Middleware, interfaces interfaces.Holder, shared shared.Holder) Controller {
 	return Controller{
 		middleware,

@@ -14,6 +14,7 @@ type (
 		Insert(request dto.CreateThreadRequest) (interface{}, interface{}, error)
 		FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error)
 		Update(request dto.EditThreadRequest) (interface{}, error)
+		Delete(request dto.DeleteThreadRequest) (interface{}, error)
 	}
 
 	service struct {
@@ -121,6 +122,15 @@ func (s *service) Update(request dto.EditThreadRequest) (interface{}, error) {
 	}
 
 	return result.ModifiedCount, nil
+}
+
+func (s *service) Delete(request dto.DeleteThreadRequest) (interface{}, error) {
+	id, _ := primitive.ObjectIDFromHex(request.ID)
+	result, err := s.Thread.DeleteOne(context.TODO(), bson.M{"_id": id, "accessToken": request.Token})
+	if err != nil {
+		return nil, err
+	}
+	return result.DeletedCount, nil
 }
 
 func NewService(db *mongo.Database) Service {

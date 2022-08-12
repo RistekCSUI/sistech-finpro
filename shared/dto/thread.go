@@ -45,3 +45,12 @@ type EditThreadResponse struct {
 	ModifiedCount int64  `json:"modifiedCount"`
 	Name          string `json:"name"`
 }
+
+type DeleteThreadRequest struct {
+	ID    string
+	Token string
+}
+
+type DeleteThreadResponse struct {
+	DeletedCount int64 `json:"deletedCount"`
+}

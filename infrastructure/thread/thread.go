@@ -23,6 +23,8 @@ func (c *Controller) ThreadRoutes(app *fiber.App) {
 	thread.Post("/", c.Middleware.AuthCheck, c.createThread)
 
 	thread.Put("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.editThread)
+
+	thread.Delete("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.deleteThread)
 }
 
 func (c *Controller) createThread(ctx *fiber.Ctx) error {
@@ -75,6 +77,19 @@ func (c *Controller) editThread(ctx *fiber.Ctx) error {
 		EditThreadDto: requestBody,
 		Token:         ctx.Locals("user").(string),
 		ThreadID:      ctx.Params("id"),
+	})
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (c *Controller) deleteThread(ctx *fiber.Ctx) error {
+	res, err := c.Interfaces.ThreadViewService.DeleteThread(dto.DeleteThreadRequest{
+		ID:    ctx.Params("id"),
+		Token: ctx.Locals("user").(string),
 	})
 
 	if err != nil {
