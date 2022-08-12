@@ -11,6 +11,7 @@ type (
 	ViewService interface {
 		CreateThread(request dto.CreateThreadRequest) (*dto.CreateThreadResponse, error)
 		GetAllThreadyByCategory(request dto.GetAllThreadRequest) (*[]dto.Thread, error)
+		EditThread(request dto.EditThreadRequest) (*dto.EditThreadResponse, error)
 	}
 	viewService struct {
 		application application.Holder
@@ -28,8 +29,10 @@ func (v *viewService) CreateThread(request dto.CreateThreadRequest) (*dto.Create
 		ID:   threadId.(primitive.ObjectID),
 		Name: request.Name,
 		FirstPost: dto.CreatePostResponse{
-			ID:      postId.(primitive.ObjectID),
-			Content: request.FirstPost.Content,
+			ID:       postId.(primitive.ObjectID),
+			Content:  request.FirstPost.Content,
+			Upvote:   0,
+			Downvote: 0,
 		},
 	}
 
@@ -42,6 +45,20 @@ func (v *viewService) GetAllThreadyByCategory(request dto.GetAllThreadRequest) (
 		return nil, err
 	}
 	return data, nil
+}
+
+func (v *viewService) EditThread(request dto.EditThreadRequest) (*dto.EditThreadResponse, error) {
+	data, err := v.application.ThreadService.Update(request)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &dto.EditThreadResponse{
+		ModifiedCount: data.(int64),
+		Name:          request.Name,
+	}
+
+	return res, nil
 }
 
 func NewViewService(application application.Holder, shared shared.Holder) ViewService {

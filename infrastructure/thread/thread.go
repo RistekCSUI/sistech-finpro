@@ -21,6 +21,8 @@ func (c *Controller) ThreadRoutes(app *fiber.App) {
 	thread.Use(c.Middleware.AccessCheck)
 
 	thread.Post("/", c.Middleware.AuthCheck, c.createThread)
+
+	thread.Put("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.editThread)
 }
 
 func (c *Controller) createThread(ctx *fiber.Ctx) error {
@@ -44,6 +46,35 @@ func (c *Controller) createThread(ctx *fiber.Ctx) error {
 		Name:       requestBody.Name,
 		FirstPost:  requestBody.FirstPost,
 		Token:      ctx.Locals("user").(string),
+	})
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (c *Controller) editThread(ctx *fiber.Ctx) error {
+	var (
+		requestBody dto.EditThreadDto
+	)
+
+	err := ctx.BodyParser(&requestBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	res, err := c.Interfaces.ThreadViewService.EditThread(dto.EditThreadRequest{
+		EditThreadDto: requestBody,
+		Token:         ctx.Locals("user").(string),
+		ThreadID:      ctx.Params("id"),
 	})
 
 	if err != nil {

@@ -30,3 +30,18 @@ type GetAllThreadRequest struct {
 	CategoryID string
 	Token      string
 }
+
+type EditThreadDto struct {
+	Name string `json:"name"`
+}
+
+type EditThreadRequest struct {
+	EditThreadDto
+	ThreadID string
+	Token    string
+}
+
+type EditThreadResponse struct {
+	ModifiedCount int64  `json:"modifiedCount"`
+	Name          string `json:"name"`
+}

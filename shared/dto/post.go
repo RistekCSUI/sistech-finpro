@@ -7,6 +7,8 @@ type Post struct {
 }
 
 type CreatePostResponse struct {
-	ID      primitive.ObjectID `json:"id"`
-	Content string             `json:"content"`
+	ID       primitive.ObjectID `json:"id"`
+	Content  string             `json:"content"`
+	Upvote   int                `json:"upvote"`
+	Downvote int                `json:"downvote"`
 }

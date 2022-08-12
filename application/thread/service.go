@@ -13,6 +13,7 @@ type (
 	Service interface {
 		Insert(request dto.CreateThreadRequest) (interface{}, interface{}, error)
 		FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error)
+		Update(request dto.EditThreadRequest) (interface{}, error)
 	}
 
 	service struct {
@@ -56,6 +57,9 @@ func (s *service) Insert(request dto.CreateThreadRequest) (interface{}, interfac
 		{"accessToken", request.Token},
 		{"content", request.FirstPost.Content},
 		{"threadId", res.InsertedID},
+		{"replyId", ""},
+		{"upvote", 0},
+		{"downvote", 0},
 	}
 
 	resPost, err := s.Post.InsertOne(context.TODO(), post)
@@ -90,6 +94,33 @@ func (s *service) FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error
 	}
 
 	return &result, nil
+}
+
+func (s *service) Update(request dto.EditThreadRequest) (interface{}, error) {
+	row := bson.D{
+		{"accessToken", request.Token},
+		{"name", request.Name},
+	}
+
+	exist := s.Thread.FindOne(context.TODO(), row)
+	if exist.Err() == nil {
+		return nil, errors.New("duplicate thread name for this access key")
+	}
+
+	id, _ := primitive.ObjectIDFromHex(request.ThreadID)
+	result, err := s.Thread.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": id, "accessToken": request.Token},
+		bson.D{
+			{"$set", bson.D{{"name", request.Name}}},
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result.ModifiedCount, nil
 }
 
 func NewService(db *mongo.Database) Service {
