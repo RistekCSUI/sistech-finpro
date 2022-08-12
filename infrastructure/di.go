@@ -5,6 +5,7 @@ import (
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/authentication"
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/category"
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/middleware"
+	"github.com/RistekCSUI/sistech-finpro/infrastructure/thread"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
@@ -17,6 +18,7 @@ type (
 		Authentication authentication.Controller
 		Middleware     middleware.Middleware
 		Category       category.Controller
+		Thread         thread.Controller
 	}
 )
 
@@ -37,6 +39,10 @@ func Register(container *dig.Container) error {
 		return errors.Wrap(err, "failed to provide category controller")
 	}
 
+	if err := container.Provide(thread.NewThreadController); err != nil {
+		return errors.Wrap(err, "failed to provide thread controller")
+	}
+
 	return nil
 }
 
@@ -44,4 +50,5 @@ func Routes(app *fiber.App, controller Holder) {
 	controller.Access.AccessRoutes(app)
 	controller.Authentication.AuthenticationRoutes(app)
 	controller.Category.CategoryRoutes(app)
+	controller.Thread.ThreadRoutes(app)
 }
