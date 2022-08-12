@@ -12,6 +12,7 @@ import (
 type (
 	Service interface {
 		Insert(request dto.CreateThreadRequest) (interface{}, interface{}, error)
+		FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error)
 	}
 
 	service struct {
@@ -63,6 +64,32 @@ func (s *service) Insert(request dto.CreateThreadRequest) (interface{}, interfac
 	}
 
 	return res.InsertedID, resPost.InsertedID, nil
+}
+
+func (s *service) FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error) {
+	var result []dto.Thread
+
+	filter := bson.D{
+		{"accessToken", request.Token},
+		{"categoryId", request.CategoryID},
+	}
+
+	cur, err := s.Thread.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	for cur.Next(context.TODO()) {
+		var elem dto.Thread
+		_ = cur.Decode(&elem)
+		result = append(result, elem)
+	}
+
+	if err = cur.Err(); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func NewService(db *mongo.Database) Service {

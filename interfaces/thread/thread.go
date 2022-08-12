@@ -10,6 +10,7 @@ import (
 type (
 	ViewService interface {
 		CreateThread(request dto.CreateThreadRequest) (*dto.CreateThreadResponse, error)
+		GetAllThreadyByCategory(request dto.GetAllThreadRequest) (*[]dto.Thread, error)
 	}
 	viewService struct {
 		application application.Holder
@@ -33,6 +34,14 @@ func (v *viewService) CreateThread(request dto.CreateThreadRequest) (*dto.Create
 	}
 
 	return response, nil
+}
+
+func (v *viewService) GetAllThreadyByCategory(request dto.GetAllThreadRequest) (*[]dto.Thread, error) {
+	data, err := v.application.ThreadService.FindAll(request)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func NewViewService(application application.Holder, shared shared.Holder) ViewService {

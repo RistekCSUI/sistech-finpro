@@ -2,6 +2,11 @@ package dto
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
+type Thread struct {
+	ID   primitive.ObjectID `json:"id" bson:"_id"`
+	Name string             `json:"name" bson:"name"`
+}
+
 type CreateThreadDto struct {
 	CategoryID string `json:"categoryId" validate:"required"`
 	Name       string `json:"name" validate:"required"`
@@ -19,4 +24,9 @@ type CreateThreadResponse struct {
 	ID        primitive.ObjectID `json:"id"`
 	Name      string             `json:"name"`
 	FirstPost CreatePostResponse `json:"firstPost"`
+}
+
+type GetAllThreadRequest struct {
+	CategoryID string
+	Token      string
 }
