@@ -30,10 +30,13 @@ func (v *viewService) CreateThread(request dto.CreateThreadRequest) (*dto.Create
 		ID:   threadId.(primitive.ObjectID),
 		Name: request.Name,
 		FirstPost: dto.CreatePostResponse{
-			ID:       postId.(primitive.ObjectID),
-			Content:  request.FirstPost.Content,
-			Upvote:   0,
-			Downvote: 0,
+			ID:        postId.(primitive.ObjectID),
+			Content:   request.FirstPost.Content,
+			Upvote:    0,
+			Downvote:  0,
+			Owner:     request.Owner,
+			Edited:    false,
+			IsStarter: true,
 		},
 	}
 

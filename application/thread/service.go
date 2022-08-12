@@ -57,10 +57,13 @@ func (s *service) Insert(request dto.CreateThreadRequest) (interface{}, interfac
 	post := bson.D{
 		{"accessToken", request.Token},
 		{"content", request.FirstPost.Content},
-		{"threadId", res.InsertedID},
+		{"threadId", res.InsertedID.(primitive.ObjectID).Hex()},
 		{"replyId", ""},
 		{"upvote", 0},
 		{"downvote", 0},
+		{"edited", false},
+		{"owner", request.Owner},
+		{"isStarter", true},
 	}
 
 	resPost, err := s.Post.InsertOne(context.TODO(), post)

@@ -4,6 +4,7 @@ import (
 	"github.com/RistekCSUI/sistech-finpro/application/access"
 	"github.com/RistekCSUI/sistech-finpro/application/authentication"
 	"github.com/RistekCSUI/sistech-finpro/application/category"
+	"github.com/RistekCSUI/sistech-finpro/application/post"
 	"github.com/RistekCSUI/sistech-finpro/application/thread"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
@@ -15,6 +16,7 @@ type Holder struct {
 	AuthService     authentication.Service
 	CategoryService category.Service
 	ThreadService   thread.Service
+	PostService     post.Service
 }
 
 func Register(container *dig.Container) error {
@@ -32,6 +34,10 @@ func Register(container *dig.Container) error {
 
 	if err := container.Provide(thread.NewService); err != nil {
 		return errors.Wrap(err, "failed to provide thread app")
+	}
+
+	if err := container.Provide(post.NewService); err != nil {
+		return errors.Wrap(err, "failed to provide post app")
 	}
 
 	return nil
