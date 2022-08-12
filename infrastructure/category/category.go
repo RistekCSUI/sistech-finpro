@@ -27,6 +27,8 @@ func (c *Controller) CategoryRoutes(app *fiber.App) {
 	category.Delete("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.deleteCategory)
 
 	category.Get("/", c.getAllCategory)
+
+	category.Get("/:id", c.getAllCategoryThread)
 }
 
 func (c *Controller) createCategory(ctx *fiber.Ctx) error {
@@ -102,6 +104,19 @@ func (c *Controller) deleteCategory(ctx *fiber.Ctx) error {
 func (c *Controller) getAllCategory(ctx *fiber.Ctx) error {
 	res, err := c.Interfaces.CategoryViewService.GetAllCategory(dto.GetAllCategoryRequest{
 		Token: ctx.Locals("user").(string),
+	})
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (c *Controller) getAllCategoryThread(ctx *fiber.Ctx) error {
+	res, err := c.Interfaces.ThreadViewService.GetAllThreadyByCategory(dto.GetAllThreadRequest{
+		Token:      ctx.Locals("user").(string),
+		CategoryID: ctx.Params("id"),
 	})
 
 	if err != nil {
