@@ -69,3 +69,19 @@ type CreateVoteResponse struct {
 	Upvote        int64 `json:"upvote"`
 	Downvote      int64 `json:"downvote"`
 }
+
+type EditPostDto struct {
+	Content string `json:"content"`
+}
+
+type EditPostRequest struct {
+	Token   string
+	PostID  string
+	Content string
+	OwnerID string
+}
+
+type EditPostResponse struct {
+	Content       string `json:"content"`
+	ModifiedCount int64  `json:"modifiedCount"`
+}

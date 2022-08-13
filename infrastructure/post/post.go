@@ -23,6 +23,8 @@ func (c *Controller) PostRoutes(app *fiber.App) {
 	post.Post("/", c.Middleware.AuthCheck, c.createPost)
 
 	post.Post("/vote", c.Middleware.AuthCheck, c.vote)
+
+	post.Put("/:id", c.Middleware.AuthCheck, c.editPost)
 }
 
 func (c *Controller) createPost(ctx *fiber.Ctx) error {
@@ -81,6 +83,36 @@ func (c *Controller) vote(ctx *fiber.Ctx) error {
 		PostID:      requestBody.PostID,
 		VoteType:    requestBody.VoteType,
 		RequesterID: ctx.Locals("auth").(dto.User).ID.Hex(),
+	})
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (c *Controller) editPost(ctx *fiber.Ctx) error {
+	var (
+		requestBody dto.EditPostDto
+	)
+
+	err := ctx.BodyParser(&requestBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	res, err := c.Interfaces.PostViewService.EditPost(dto.EditPostRequest{
+		Content: requestBody.Content,
+		PostID:  ctx.Params("id"),
+		Token:   ctx.Locals("user").(string),
+		OwnerID: ctx.Locals("auth").(dto.User).ID.Hex(),
 	})
 
 	if err != nil {

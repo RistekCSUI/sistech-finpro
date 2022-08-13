@@ -12,6 +12,7 @@ type (
 		GetAllPostByThread(request dto.GetAllPostRequest) (*[]dto.Post, error)
 		CreatePost(request dto.CreatePostRequest) (*dto.CreatePostResponse, error)
 		VotePost(request dto.CreateVoteRequest) (*dto.CreateVoteResponse, error)
+		EditPost(request dto.EditPostRequest) (*dto.EditPostResponse, error)
 	}
 	viewService struct {
 		application application.Holder
@@ -58,6 +59,20 @@ func (v *viewService) VotePost(request dto.CreateVoteRequest) (*dto.CreateVoteRe
 		Upvote:        post.Upvote,
 		Downvote:      post.Downvote,
 		ModifiedCount: count.(int64),
+	}
+
+	return response, nil
+}
+
+func (v *viewService) EditPost(request dto.EditPostRequest) (*dto.EditPostResponse, error) {
+	count, err := v.application.PostService.Update(request)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &dto.EditPostResponse{
+		ModifiedCount: count.(int64),
+		Content:       request.Content,
 	}
 
 	return response, nil

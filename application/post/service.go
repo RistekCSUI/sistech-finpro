@@ -2,7 +2,6 @@ package post
 
 import (
 	"context"
-	"fmt"
 	"github.com/RistekCSUI/sistech-finpro/shared/dto"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,6 +14,7 @@ type (
 		FindAll(request dto.GetAllPostRequest) (*[]dto.Post, error)
 		Insert(request dto.CreatePostRequest) (interface{}, error)
 		Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, error)
+		Update(request dto.EditPostRequest) (interface{}, error)
 	}
 	service struct {
 		DB     *mongo.Collection
@@ -90,7 +90,6 @@ func (s *service) Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, e
 	var post dto.Post
 	err := s.DB.FindOne(context.TODO(), row).Decode(&post)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, nil, errors.New("no post for given id")
 	}
 
@@ -122,6 +121,26 @@ func (s *service) Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, e
 	}
 
 	return result.ModifiedCount, &post, nil
+}
+
+func (s *service) Update(request dto.EditPostRequest) (interface{}, error) {
+	id, _ := primitive.ObjectIDFromHex(request.PostID)
+	result, err := s.DB.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": id, "accessToken": request.Token, "owner": request.OwnerID},
+		bson.D{
+			{"$set", bson.D{
+				{"content", request.Content},
+				{"edited", true},
+			}},
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result.ModifiedCount, nil
 }
 
 func NewService(db *mongo.Database) Service {
