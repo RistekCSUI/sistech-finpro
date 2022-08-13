@@ -22,7 +22,7 @@ func (c *Controller) ThreadRoutes(app *fiber.App) {
 
 	thread.Post("/", c.Middleware.AuthCheck, c.createThread)
 
-	thread.Put("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.editThread)
+	thread.Put("/:id", c.Middleware.AuthCheck, c.editThread)
 
 	thread.Delete("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.deleteThread)
 

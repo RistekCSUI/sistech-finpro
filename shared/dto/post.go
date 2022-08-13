@@ -17,6 +17,20 @@ type Post struct {
 	Edited    bool               `json:"edited" bson:"edited"`
 }
 
+type CreatePostDto struct {
+	ThreadID string `json:"threadId" validate:"required"`
+	Content  string `json:"content" validate:"required"`
+	ReplyID  string `json:"replyId"`
+}
+
+type CreatePostRequest struct {
+	Token    string
+	Content  string
+	Owner    string
+	ThreadID string
+	ReplyID  string
+}
+
 type CreatePostResponse struct {
 	ID        primitive.ObjectID `json:"id"`
 	Content   string             `json:"content"`
@@ -25,6 +39,7 @@ type CreatePostResponse struct {
 	Owner     string             `json:"owner"`
 	Edited    bool               `json:"edited"`
 	IsStarter bool               `json:"isStarter"`
+	ReplyID   string             `json:"replyId"`
 }
 
 type GetAllPostRequest struct {
