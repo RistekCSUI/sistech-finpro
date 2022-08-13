@@ -5,6 +5,7 @@ import (
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/authentication"
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/category"
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/middleware"
+	"github.com/RistekCSUI/sistech-finpro/infrastructure/post"
 	"github.com/RistekCSUI/sistech-finpro/infrastructure/thread"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
@@ -19,6 +20,7 @@ type (
 		Middleware     middleware.Middleware
 		Category       category.Controller
 		Thread         thread.Controller
+		Post           post.Controller
 	}
 )
 
@@ -43,6 +45,10 @@ func Register(container *dig.Container) error {
 		return errors.Wrap(err, "failed to provide thread controller")
 	}
 
+	if err := container.Provide(post.NewPostController); err != nil {
+		return errors.Wrap(err, "failed to provide post controller")
+	}
+
 	return nil
 }
 
@@ -51,4 +57,5 @@ func Routes(app *fiber.App, controller Holder) {
 	controller.Authentication.AuthenticationRoutes(app)
 	controller.Category.CategoryRoutes(app)
 	controller.Thread.ThreadRoutes(app)
+	controller.Post.PostRoutes(app)
 }
