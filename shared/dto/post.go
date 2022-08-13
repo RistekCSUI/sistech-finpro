@@ -85,3 +85,13 @@ type EditPostResponse struct {
 	Content       string `json:"content"`
 	ModifiedCount int64  `json:"modifiedCount"`
 }
+
+type DeletePostRequest struct {
+	Token       string
+	PostID      string
+	RequesterID string
+}
+
+type DeletePostResponse struct {
+	DeleteCount int64 `json:"deleteCount"`
+}

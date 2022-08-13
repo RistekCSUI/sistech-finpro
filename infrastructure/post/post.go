@@ -25,6 +25,8 @@ func (c *Controller) PostRoutes(app *fiber.App) {
 	post.Post("/vote", c.Middleware.AuthCheck, c.vote)
 
 	post.Put("/:id", c.Middleware.AuthCheck, c.editPost)
+
+	post.Delete("/:id", c.Middleware.AuthCheck, c.Middleware.RoleAdminCheck, c.deletePost)
 }
 
 func (c *Controller) createPost(ctx *fiber.Ctx) error {
@@ -115,6 +117,19 @@ func (c *Controller) editPost(ctx *fiber.Ctx) error {
 		OwnerID: ctx.Locals("auth").(dto.User).ID.Hex(),
 	})
 
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (c *Controller) deletePost(ctx *fiber.Ctx) error {
+	res, err := c.Interfaces.PostViewService.DeletePost(dto.DeletePostRequest{
+		PostID:      ctx.Params("id"),
+		Token:       ctx.Locals("user").(string),
+		RequesterID: ctx.Locals("auth").(dto.User).ID.Hex(),
+	})
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}

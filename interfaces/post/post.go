@@ -13,6 +13,7 @@ type (
 		CreatePost(request dto.CreatePostRequest) (*dto.CreatePostResponse, error)
 		VotePost(request dto.CreateVoteRequest) (*dto.CreateVoteResponse, error)
 		EditPost(request dto.EditPostRequest) (*dto.EditPostResponse, error)
+		DeletePost(request dto.DeletePostRequest) (*dto.DeletePostResponse, error)
 	}
 	viewService struct {
 		application application.Holder
@@ -75,6 +76,17 @@ func (v *viewService) EditPost(request dto.EditPostRequest) (*dto.EditPostRespon
 		Content:       request.Content,
 	}
 
+	return response, nil
+}
+
+func (v *viewService) DeletePost(request dto.DeletePostRequest) (*dto.DeletePostResponse, error) {
+	count, err := v.application.PostService.Delete(request)
+	if err != nil {
+		return nil, err
+	}
+	response := &dto.DeletePostResponse{
+		DeleteCount: count.(int64),
+	}
 	return response, nil
 }
 

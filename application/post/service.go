@@ -15,6 +15,7 @@ type (
 		Insert(request dto.CreatePostRequest) (interface{}, error)
 		Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, error)
 		Update(request dto.EditPostRequest) (interface{}, error)
+		Delete(request dto.DeletePostRequest) (interface{}, error)
 	}
 	service struct {
 		DB     *mongo.Collection
@@ -121,6 +122,19 @@ func (s *service) Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, e
 	}
 
 	return result.ModifiedCount, &post, nil
+}
+
+func (s *service) Delete(request dto.DeletePostRequest) (interface{}, error) {
+	id, _ := primitive.ObjectIDFromHex(request.PostID)
+	result, err := s.DB.DeleteOne(context.TODO(), bson.M{
+		"_id":         id,
+		"accessToken": request.Token,
+		"owner":       request.RequesterID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.DeletedCount, nil
 }
 
 func (s *service) Update(request dto.EditPostRequest) (interface{}, error) {
