@@ -10,4 +10,6 @@ first you need to have docker and docker compose in your local machine
 
 and run this command in your terminal
 
+`cp .env.example .env`
+
 `docker-compose up`
