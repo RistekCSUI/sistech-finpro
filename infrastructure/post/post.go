@@ -21,6 +21,8 @@ func (c *Controller) PostRoutes(app *fiber.App) {
 	post.Use(c.Middleware.AccessCheck)
 
 	post.Post("/", c.Middleware.AuthCheck, c.createPost)
+
+	post.Post("/vote", c.Middleware.AuthCheck, c.vote)
 }
 
 func (c *Controller) createPost(ctx *fiber.Ctx) error {
@@ -45,6 +47,40 @@ func (c *Controller) createPost(ctx *fiber.Ctx) error {
 		ReplyID:  requestBody.ReplyID,
 		Token:    ctx.Locals("user").(string),
 		Owner:    ctx.Locals("auth").(dto.User).ID.Hex(),
+	})
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (c *Controller) vote(ctx *fiber.Ctx) error {
+	var (
+		requestBody dto.VoteDto
+	)
+
+	err := ctx.BodyParser(&requestBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	validate := validator.New()
+	err = validate.Struct(requestBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if requestBody.VoteType != dto.UPVOTE && requestBody.VoteType != dto.DOWNVOTE {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid vote type"})
+	}
+
+	res, err := c.Interfaces.PostViewService.VotePost(dto.CreateVoteRequest{
+		Token:       ctx.Locals("user").(string),
+		PostID:      requestBody.PostID,
+		VoteType:    requestBody.VoteType,
+		RequesterID: ctx.Locals("auth").(dto.User).ID.Hex(),
 	})
 
 	if err != nil {

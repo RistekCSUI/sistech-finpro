@@ -11,6 +11,7 @@ type (
 	ViewService interface {
 		GetAllPostByThread(request dto.GetAllPostRequest) (*[]dto.Post, error)
 		CreatePost(request dto.CreatePostRequest) (*dto.CreatePostResponse, error)
+		VotePost(request dto.CreateVoteRequest) (*dto.CreateVoteResponse, error)
 	}
 	viewService struct {
 		application application.Holder
@@ -45,6 +46,21 @@ func (v *viewService) CreatePost(request dto.CreatePostRequest) (*dto.CreatePost
 	}
 
 	return &response, nil
+}
+
+func (v *viewService) VotePost(request dto.CreateVoteRequest) (*dto.CreateVoteResponse, error) {
+	count, post, err := v.application.PostService.Vote(request)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &dto.CreateVoteResponse{
+		Upvote:        post.Upvote,
+		Downvote:      post.Downvote,
+		ModifiedCount: count.(int64),
+	}
+
+	return response, nil
 }
 
 func NewViewService(application application.Holder, shared shared.Holder) ViewService {

@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+	"fmt"
 	"github.com/RistekCSUI/sistech-finpro/shared/dto"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,6 +14,7 @@ type (
 	Service interface {
 		FindAll(request dto.GetAllPostRequest) (*[]dto.Post, error)
 		Insert(request dto.CreatePostRequest) (interface{}, error)
+		Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, error)
 	}
 	service struct {
 		DB     *mongo.Collection
@@ -76,6 +78,50 @@ func (s *service) FindAll(request dto.GetAllPostRequest) (*[]dto.Post, error) {
 	}
 
 	return &result, nil
+}
+
+func (s *service) Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, error) {
+	id, _ := primitive.ObjectIDFromHex(request.PostID)
+	row := bson.D{
+		{"_id", id},
+		{"accessToken", request.Token},
+	}
+
+	var post dto.Post
+	err := s.DB.FindOne(context.TODO(), row).Decode(&post)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, nil, errors.New("no post for given id")
+	}
+
+	if post.Owner == request.RequesterID {
+		return nil, nil, errors.New("cant vote your own post")
+	}
+
+	newVote := bson.D{
+		{dto.UPVOTE, post.Upvote + 1},
+	}
+	post.Upvote += 1
+
+	if request.VoteType == dto.DOWNVOTE {
+		newVote = bson.D{{dto.DOWNVOTE, post.Downvote + 1}}
+		post.Upvote -= 1
+		post.Downvote += 1
+	}
+
+	result, err := s.DB.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": id, "accessToken": request.Token},
+		bson.D{
+			{"$set", newVote},
+		},
+	)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return result.ModifiedCount, &post, nil
 }
 
 func NewService(db *mongo.Database) Service {

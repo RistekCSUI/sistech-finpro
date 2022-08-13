@@ -2,6 +2,11 @@ package dto
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
+const (
+	UPVOTE   = "upvote"
+	DOWNVOTE = "downvote"
+)
+
 type PostInThread struct {
 	Content string `json:"content" validate:"required"`
 }
@@ -45,4 +50,22 @@ type CreatePostResponse struct {
 type GetAllPostRequest struct {
 	ThreadID string
 	Token    string
+}
+
+type VoteDto struct {
+	VoteType string `json:"voteType"`
+	PostID   string `json:"postId"`
+}
+
+type CreateVoteRequest struct {
+	Token       string
+	PostID      string
+	VoteType    string
+	RequesterID string
+}
+
+type CreateVoteResponse struct {
+	ModifiedCount int64 `json:"modifiedCount"`
+	Upvote        int64 `json:"upvote"`
+	Downvote      int64 `json:"downvote"`
 }
