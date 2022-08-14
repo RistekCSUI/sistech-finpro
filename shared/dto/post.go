@@ -52,6 +52,11 @@ type GetAllPostRequest struct {
 	Token    string
 }
 
+type GetAllPostResponse struct {
+	Name string `json:"name"`
+	Data []Post `json:"data"`
+}
+
 type VoteDto struct {
 	VoteType string `json:"voteType"`
 	PostID   string `json:"postId"`

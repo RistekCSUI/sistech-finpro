@@ -32,6 +32,11 @@ type GetAllThreadRequest struct {
 	Token      string
 }
 
+type GetAllThreadResponse struct {
+	Name string   `json:"name"`
+	Data []Thread `json:"data"`
+}
+
 type EditThreadDto struct {
 	Name string `json:"name"`
 }

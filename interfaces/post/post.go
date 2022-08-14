@@ -10,7 +10,7 @@ import (
 
 type (
 	ViewService interface {
-		GetAllPostByThread(request dto.GetAllPostRequest) (*[]dto.Post, error)
+		GetAllPostByThread(request dto.GetAllPostRequest) (*dto.GetAllPostResponse, error)
 		CreatePost(request dto.CreatePostRequest) (*dto.CreatePostResponse, error)
 		VotePost(request dto.CreateVoteRequest) (*dto.CreateVoteResponse, error)
 		EditPost(request dto.EditPostRequest) (*dto.EditPostResponse, error)
@@ -22,13 +22,17 @@ type (
 	}
 )
 
-func (v *viewService) GetAllPostByThread(request dto.GetAllPostRequest) (*[]dto.Post, error) {
-	data, err := v.application.PostService.FindAll(request)
-
+func (v *viewService) GetAllPostByThread(request dto.GetAllPostRequest) (*dto.GetAllPostResponse, error) {
+	data, thread, err := v.application.PostService.FindAll(request)
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+
+	response := &dto.GetAllPostResponse{
+		Name: thread.Name,
+		Data: *data,
+	}
+	return response, nil
 }
 
 func (v *viewService) CreatePost(request dto.CreatePostRequest) (*dto.CreatePostResponse, error) {

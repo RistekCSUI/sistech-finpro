@@ -11,7 +11,7 @@ import (
 type (
 	ViewService interface {
 		CreateThread(request dto.CreateThreadRequest) (*dto.CreateThreadResponse, error)
-		GetAllThreadyByCategory(request dto.GetAllThreadRequest) (*[]dto.Thread, error)
+		GetAllThreadyByCategory(request dto.GetAllThreadRequest) (*dto.GetAllThreadResponse, error)
 		EditThread(request dto.EditThreadRequest) (*dto.EditThreadResponse, error)
 		DeleteThread(request dto.DeleteThreadRequest) (*dto.DeleteThreadResponse, error)
 	}
@@ -44,12 +44,18 @@ func (v *viewService) CreateThread(request dto.CreateThreadRequest) (*dto.Create
 	return response, nil
 }
 
-func (v *viewService) GetAllThreadyByCategory(request dto.GetAllThreadRequest) (*[]dto.Thread, error) {
-	data, err := v.application.ThreadService.FindAll(request)
+func (v *viewService) GetAllThreadyByCategory(request dto.GetAllThreadRequest) (*dto.GetAllThreadResponse, error) {
+	data, category, err := v.application.ThreadService.FindAll(request)
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+
+	response := &dto.GetAllThreadResponse{
+		Name: category.Name,
+		Data: *data,
+	}
+
+	return response, nil
 }
 
 func (v *viewService) EditThread(request dto.EditThreadRequest) (*dto.EditThreadResponse, error) {

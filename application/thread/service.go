@@ -12,7 +12,7 @@ import (
 type (
 	Service interface {
 		Insert(request dto.CreateThreadRequest) (interface{}, interface{}, error)
-		FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error)
+		FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, *dto.Category, error)
 		Update(request dto.EditThreadRequest) (interface{}, error)
 		Delete(request dto.DeleteThreadRequest) (interface{}, error)
 	}
@@ -74,8 +74,18 @@ func (s *service) Insert(request dto.CreateThreadRequest) (interface{}, interfac
 	return res.InsertedID, resPost.InsertedID, nil
 }
 
-func (s *service) FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error) {
+func (s *service) FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, *dto.Category, error) {
 	var result []dto.Thread
+	var category dto.Category
+
+	id, _ := primitive.ObjectIDFromHex(request.CategoryID)
+	err := s.Category.FindOne(context.TODO(), bson.D{
+		{"_id", id},
+		{"accessToken", request.Token},
+	}).Decode(&category)
+	if err != nil {
+		return nil, nil, errors.New("no category found for given id")
+	}
 
 	filter := bson.D{
 		{"accessToken", request.Token},
@@ -84,7 +94,7 @@ func (s *service) FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error
 
 	cur, err := s.Thread.Find(context.TODO(), filter)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	for cur.Next(context.TODO()) {
@@ -94,10 +104,10 @@ func (s *service) FindAll(request dto.GetAllThreadRequest) (*[]dto.Thread, error
 	}
 
 	if err = cur.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &result, nil
+	return &result, &category, nil
 }
 
 func (s *service) Update(request dto.EditThreadRequest) (interface{}, error) {

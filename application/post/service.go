@@ -11,7 +11,7 @@ import (
 
 type (
 	Service interface {
-		FindAll(request dto.GetAllPostRequest) (*[]dto.Post, error)
+		FindAll(request dto.GetAllPostRequest) (*[]dto.Post, *dto.Thread, error)
 		Insert(request dto.CreatePostRequest) (interface{}, error)
 		Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, error)
 		Update(request dto.EditPostRequest) (interface{}, error)
@@ -56,8 +56,18 @@ func (s *service) Insert(request dto.CreatePostRequest) (interface{}, error) {
 	return res.InsertedID, nil
 }
 
-func (s *service) FindAll(request dto.GetAllPostRequest) (*[]dto.Post, error) {
+func (s *service) FindAll(request dto.GetAllPostRequest) (*[]dto.Post, *dto.Thread, error) {
 	var result []dto.Post
+	var thread dto.Thread
+
+	id, _ := primitive.ObjectIDFromHex(request.ThreadID)
+	err := s.Thread.FindOne(context.TODO(), bson.D{
+		{"_id", id},
+		{"accessToken", request.Token},
+	}).Decode(&thread)
+	if err != nil {
+		return nil, nil, errors.New("no thread found for given id")
+	}
 
 	filter := bson.D{
 		{"accessToken", request.Token},
@@ -66,7 +76,7 @@ func (s *service) FindAll(request dto.GetAllPostRequest) (*[]dto.Post, error) {
 
 	cur, err := s.DB.Find(context.TODO(), filter)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	for cur.Next(context.TODO()) {
@@ -76,10 +86,10 @@ func (s *service) FindAll(request dto.GetAllPostRequest) (*[]dto.Post, error) {
 	}
 
 	if err = cur.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &result, nil
+	return &result, &thread, nil
 }
 
 func (s *service) Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, error) {
