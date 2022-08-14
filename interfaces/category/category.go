@@ -4,6 +4,7 @@ import (
 	"github.com/RistekCSUI/sistech-finpro/application"
 	"github.com/RistekCSUI/sistech-finpro/shared"
 	"github.com/RistekCSUI/sistech-finpro/shared/dto"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -45,6 +46,10 @@ func (v *viewService) EditCategory(request dto.EditCategoryRequest) (*dto.EditCa
 		Name:          request.Name,
 	}
 
+	if res.ModifiedCount == 0 {
+		return nil, errors.New("failed to update category")
+	}
+
 	return res, nil
 }
 
@@ -56,6 +61,10 @@ func (v *viewService) DeleteCategory(request dto.DeleteCategoryRequest) (*dto.De
 
 	res := &dto.DeleteCategoryResponse{
 		DeletedCount: data.(int64),
+	}
+
+	if res.DeletedCount == 0 {
+		return nil, errors.New("failed to delete category")
 	}
 
 	return res, nil

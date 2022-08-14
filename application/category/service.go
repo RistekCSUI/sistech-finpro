@@ -47,8 +47,9 @@ func (s *service) Update(request dto.EditCategoryRequest) (interface{}, error) {
 		{"name", request.Name},
 	}
 
-	exist := s.DB.FindOne(context.TODO(), row)
-	if exist.Err() == nil {
+	var exist dto.Category
+	err := s.DB.FindOne(context.TODO(), row).Decode(&exist)
+	if err == nil && exist.Name != request.Name {
 		return nil, errors.New("duplicate category name for this access key")
 	}
 

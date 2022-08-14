@@ -20,6 +20,7 @@ type (
 	service struct {
 		DB     *mongo.Collection
 		Thread *mongo.Collection
+		Post   *mongo.Collection
 	}
 )
 
@@ -129,7 +130,6 @@ func (s *service) Delete(request dto.DeletePostRequest) (interface{}, error) {
 	result, err := s.DB.DeleteOne(context.TODO(), bson.M{
 		"_id":         id,
 		"accessToken": request.Token,
-		"owner":       request.RequesterID,
 	})
 	if err != nil {
 		return nil, err
@@ -161,5 +161,6 @@ func NewService(db *mongo.Database) Service {
 	return &service{
 		DB:     db.Collection("post"),
 		Thread: db.Collection("thread"),
+		Post:   db.Collection("post"),
 	}
 }

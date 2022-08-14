@@ -106,8 +106,9 @@ func (s *service) Update(request dto.EditThreadRequest) (interface{}, error) {
 		{"name", request.Name},
 	}
 
-	exist := s.Thread.FindOne(context.TODO(), row)
-	if exist.Err() == nil {
+	var exist dto.Thread
+	err := s.Thread.FindOne(context.TODO(), row).Decode(&exist)
+	if err == nil && exist.Name != request.Name {
 		return nil, errors.New("duplicate thread name for this access key")
 	}
 
@@ -133,6 +134,7 @@ func (s *service) Delete(request dto.DeleteThreadRequest) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	_, _ = s.Post.DeleteMany(context.TODO(), bson.D{{"threadId", request.ID}})
 	return result.DeletedCount, nil
 }
 

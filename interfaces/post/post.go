@@ -4,6 +4,7 @@ import (
 	"github.com/RistekCSUI/sistech-finpro/application"
 	"github.com/RistekCSUI/sistech-finpro/shared"
 	"github.com/RistekCSUI/sistech-finpro/shared/dto"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -76,6 +77,10 @@ func (v *viewService) EditPost(request dto.EditPostRequest) (*dto.EditPostRespon
 		Content:       request.Content,
 	}
 
+	if response.ModifiedCount == 0 {
+		return nil, errors.New("failed to edit post")
+	}
+
 	return response, nil
 }
 
@@ -86,6 +91,9 @@ func (v *viewService) DeletePost(request dto.DeletePostRequest) (*dto.DeletePost
 	}
 	response := &dto.DeletePostResponse{
 		DeleteCount: count.(int64),
+	}
+	if response.DeleteCount == 0 {
+		return nil, errors.New("failed to delete post")
 	}
 	return response, nil
 }

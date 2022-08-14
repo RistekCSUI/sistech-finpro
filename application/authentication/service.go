@@ -56,7 +56,7 @@ func (s *service) FindUser(token string, username string) (dto.User, error) {
 		}).Decode(&result)
 
 	if err != nil {
-		return result, err
+		return result, errors.New("no user found for given username")
 	}
 
 	return result, nil

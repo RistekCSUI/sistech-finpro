@@ -70,6 +70,11 @@ func (v *viewService) Login(request dto.LoginRequest) (*dto.LoginResponse, error
 		return nil, err
 	}
 
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+	if err != nil {
+		return nil, errors.New("wrong password")
+	}
+
 	token, err := v.shared.JWT.GenerateToken(user.ID.Hex())
 
 	response := &dto.LoginResponse{

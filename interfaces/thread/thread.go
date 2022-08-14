@@ -1,6 +1,7 @@
 package thread
 
 import (
+	"errors"
 	"github.com/RistekCSUI/sistech-finpro/application"
 	"github.com/RistekCSUI/sistech-finpro/shared"
 	"github.com/RistekCSUI/sistech-finpro/shared/dto"
@@ -62,6 +63,10 @@ func (v *viewService) EditThread(request dto.EditThreadRequest) (*dto.EditThread
 		Name:          request.Name,
 	}
 
+	if res.ModifiedCount == 0 {
+		return nil, errors.New("failed to edit thread")
+	}
+
 	return res, nil
 }
 
@@ -73,6 +78,10 @@ func (v *viewService) DeleteThread(request dto.DeleteThreadRequest) (*dto.Delete
 
 	res := &dto.DeleteThreadResponse{
 		DeletedCount: data.(int64),
+	}
+
+	if res.DeletedCount == 0 {
+		return nil, errors.New("failed to delete thread")
 	}
 
 	return res, nil
