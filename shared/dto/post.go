@@ -44,7 +44,12 @@ type CreatePostResponse struct {
 	Owner     string             `json:"owner"`
 	Edited    bool               `json:"edited"`
 	IsStarter bool               `json:"isStarter"`
-	ReplyID   string             `json:"replyId"`
+	ReplyID   ReplyPost          `json:"reply"`
+}
+
+type ReplyPost struct {
+	ID      primitive.ObjectID `json:"id"`
+	Content string             `json:"content"`
 }
 
 type GetAllPostRequest struct {

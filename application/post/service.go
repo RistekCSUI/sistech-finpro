@@ -12,7 +12,7 @@ import (
 type (
 	Service interface {
 		FindAll(request dto.GetAllPostRequest) (*[]dto.Post, *dto.Thread, error)
-		Insert(request dto.CreatePostRequest) (interface{}, error)
+		Insert(request dto.CreatePostRequest) (interface{}, *dto.Post, error)
 		Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, error)
 		Update(request dto.EditPostRequest) (interface{}, error)
 		Delete(request dto.DeletePostRequest) (interface{}, error)
@@ -24,7 +24,7 @@ type (
 	}
 )
 
-func (s *service) Insert(request dto.CreatePostRequest) (interface{}, error) {
+func (s *service) Insert(request dto.CreatePostRequest) (interface{}, *dto.Post, error) {
 	// Check if thread exist
 	id, _ := primitive.ObjectIDFromHex(request.ThreadID)
 	thread := bson.D{
@@ -33,7 +33,7 @@ func (s *service) Insert(request dto.CreatePostRequest) (interface{}, error) {
 	}
 	exist := s.Thread.FindOne(context.TODO(), thread)
 	if exist.Err() != nil {
-		return nil, errors.New("no thread for given id")
+		return nil, nil, errors.New("no thread for given id")
 	}
 
 	post := bson.D{
@@ -50,10 +50,25 @@ func (s *service) Insert(request dto.CreatePostRequest) (interface{}, error) {
 
 	res, err := s.DB.InsertOne(context.TODO(), post)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return res.InsertedID, nil
+	if request.ReplyID != "" {
+		var replyPost dto.Post
+		replyId, _ := primitive.ObjectIDFromHex(request.ReplyID)
+		err := s.Post.FindOne(context.TODO(), bson.D{
+			{"_id", replyId},
+			{"accessToken", request.Token},
+		}).Decode(&replyPost)
+
+		if err != nil {
+			return nil, nil, errors.New("no post for given reply id")
+		}
+
+		return res.InsertedID, &replyPost, nil
+	}
+
+	return res.InsertedID, nil, nil
 }
 
 func (s *service) FindAll(request dto.GetAllPostRequest) (*[]dto.Post, *dto.Thread, error) {
@@ -137,6 +152,21 @@ func (s *service) Vote(request dto.CreateVoteRequest) (interface{}, *dto.Post, e
 
 func (s *service) Delete(request dto.DeletePostRequest) (interface{}, error) {
 	id, _ := primitive.ObjectIDFromHex(request.PostID)
+
+	var existingPost dto.Post
+	err := s.DB.FindOne(context.TODO(), bson.D{
+		{"_id", id},
+		{"accessToken", request.Token},
+	}).Decode(&existingPost)
+
+	if err != nil {
+		return nil, errors.New("no post found for given id")
+	}
+
+	if existingPost.IsStarter {
+		return nil, errors.New("can't delete starter post")
+	}
+
 	result, err := s.DB.DeleteOne(context.TODO(), bson.M{
 		"_id":         id,
 		"accessToken": request.Token,

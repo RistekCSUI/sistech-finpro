@@ -36,7 +36,7 @@ func (v *viewService) GetAllPostByThread(request dto.GetAllPostRequest) (*dto.Ge
 }
 
 func (v *viewService) CreatePost(request dto.CreatePostRequest) (*dto.CreatePostResponse, error) {
-	id, err := v.application.PostService.Insert(request)
+	id, replyPost, err := v.application.PostService.Insert(request)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,13 @@ func (v *viewService) CreatePost(request dto.CreatePostRequest) (*dto.CreatePost
 		Owner:     request.Owner,
 		Edited:    false,
 		IsStarter: false,
-		ReplyID:   request.ReplyID,
+	}
+
+	if request.ReplyID != "" {
+		response.ReplyID = dto.ReplyPost{
+			ID:      replyPost.ID,
+			Content: replyPost.Content,
+		}
 	}
 
 	return &response, nil
